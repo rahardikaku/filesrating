@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<info xmlns:xsi= "http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
+    <!--
+    SPDX-FileCopyrightText: Ano Rangga Rahardika <rahardikaku@gmail.com>
+    SPDX-License-Identifier: CC0-1.0
+    -->
+    <id>filesrating</id>
+    <name>Files Rating</name>
+    <summary>Give rating to shared files</summary>
+    <description><![CDATA[Give rating to shared files]]></description>
+    <version>0.0.1</version>
+    <licence>agpl</licence>
+    <author mail="rahardikaku@gmail.com" >Ano Rangga Rahardika</author>
+    <namespace>FilesRating</namespace>
+    <category>files</category>
+    <bugs>https://github.com/rahardikaku/filesrating</bugs>
+    <dependencies>
+        <nextcloud min-version="27" max-version="28"/>
+    </dependencies>
+</info>
