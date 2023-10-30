@@ -17,7 +17,7 @@ $requirements = [
 return [
 	'ocs' => [
         ['name' => 'rating#getFilesRating', 'url' => '/api/{apiVersion}/rating/{id}', 'verb' => 'GET', 'requirements' => $requirements],
-        ['name' => 'rating#getInitialState', 'url' => '/api/{apiVersion}/rating/initialstate/{id}', 'verb' => 'GET', 'requirements' => $requirements],
+        ['name' => 'rating#getInitialState', 'url' => '/api/{apiVersion}/rating/initialstate/{userId}/{fileId}', 'verb' => 'GET', 'requirements' => $requirements],
         ['name' => 'rating#addFilesRating', 'url' => '/api/{apiVersion}/rating/{id}', 'verb' => 'PUT', 'requirements' => $requirements],
     ],
 ];

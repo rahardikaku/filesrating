@@ -2,7 +2,7 @@
 namespace OCA\FilesRating\Controller;
 
 use Exception;
-// use OCA\NoteBook\Db\NoteMapper;
+use OCA\FilesRating\Db\FilesRatingMapper;
 // use OCA\NoteBook\Service\NoteService;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
@@ -15,7 +15,7 @@ class RatingController extends OCSController {
     public function __construct(
         string             $appName,
         IRequest           $request,
-        // private NoteMapper $noteMapper,
+        private FilesRatingMapper $filesRatingMapper,
         // private NoteService $noteService,
         private ?string    $userId
     ) {
@@ -38,10 +38,23 @@ class RatingController extends OCSController {
 
 	/**
      * @NoAdminRequired
-     * @param int $iddoc
+     * @param string $userId
+	 * @param string $fileId
      * @return DataResponse
      */
-    public function getInitialState(int $id): DataResponse {
+    public function getInitialState(string $userId, string $fileId): DataResponse {
+		//get average rating file
+		//$avgRateFile = $this->filesRatingMapper->findAvgRateFile($fileId);
+
+		//get average rating file by computing
+		//$avgRateFile = $this->filesRatingMapper->computeAvgRateFile($fileId);
+
+		//get all rating by file id
+		//$allRateFile = $this->filesRatingMapper->findRateFile($fileId);
+
+		//get rating current user and file id
+		//$ratingUserFile =  $this->filesRatingMapper->findByUserAndFile($userId,$fileId);
+
 		$data = ['id' => '1', 'rate_avg' => '3'];
         try {
             return new DataResponse($data);

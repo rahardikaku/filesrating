@@ -11469,9 +11469,11 @@ __webpack_require__.r(__webpack_exports__);
     }
   },
   methods: {
-    setInitialState(id) {
-      const url = (0,_nextcloud_router__WEBPACK_IMPORTED_MODULE_6__.generateOcsUrl)('apps/filesrating/api/v1/rating/initialstate/{id}', {
-        id
+    setInitialState(userId) {
+      const fileId = '5';
+      const url = (0,_nextcloud_router__WEBPACK_IMPORTED_MODULE_6__.generateOcsUrl)('apps/filesrating/api/v1/rating/initialstate/{userId}/{fileId}', {
+        userId,
+        fileId
       });
       _nextcloud_axios__WEBPACK_IMPORTED_MODULE_7__["default"].get(url).then(response => {
         this.setState(response);

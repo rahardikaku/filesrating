@@ -133,8 +133,9 @@ export default {
 		}
 	},
 	methods: {
-		setInitialState(id) {
-			const url = generateOcsUrl('apps/filesrating/api/v1/rating/initialstate/{id}', { id })
+		setInitialState(userId) {
+			const fileId = '5'
+			const url = generateOcsUrl('apps/filesrating/api/v1/rating/initialstate/{userId}/{fileId}', { userId, fileId })
 			axios.get(url).then(response => {
 				this.setState(response)
 			}).catch((error) => {
