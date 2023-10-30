@@ -1,19 +1,45 @@
-/**
- * SPDX-FileCopyrightText: 2018 John Molakvoæ <skjnldsv@protonmail.com>
- * SPDX-License-Identifier: AGPL-3.0-or-later
- */
-
-import { generateFilePath } from '@nextcloud/router'
-
 import Vue from 'vue'
-import App from './App'
+import { translate, translatePlural } from '@nextcloud/l10n'
 
-// eslint-disable-next-line
-__webpack_public_path__ = generateFilePath(appName, '', 'js/')
+import FilesRatingTab from './FilesRatingTab.vue'
 
-Vue.mixin({ methods: { t, n } })
+Vue.prototype.t = translate
+Vue.prototype.n = translatePlural
 
-export default new Vue({
-	el: '#content',
-	render: h => h(App),
+const View = Vue.extend(FilesRatingTab)
+let tabInstance = null
+
+window.addEventListener('DOMContentLoaded', function() {
+	if (OCA.Files && OCA.Files.Sidebar) {
+		const filesratingTab = new OCA.Files.Sidebar.Tab({
+			id: 'filesrating',
+			name: t('filesrating', 'Rating File'),
+			icon: 'icon-star',
+
+			async mount(el, fileInfo, context) {
+				if (tabInstance) {
+					tabInstance.$destroy()
+				}
+				tabInstance = new View({
+					// Better integration with vue parent component
+					parent: context,
+				})
+				// Only mount after we have all the info we need
+				await tabInstance.update(fileInfo)
+				tabInstance.$mount(el)
+
+			},
+			update(fileInfo) {
+				tabInstance.update(fileInfo)
+			},
+			destroy() {
+				tabInstance.$destroy()
+				tabInstance = null
+			},
+			enabled(fileInfo) {
+				return !(fileInfo?.isDirectory() ?? true)
+			},
+		})
+		OCA.Files.Sidebar.registerTab(filesratingTab)
+	}
 })

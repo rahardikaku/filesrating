@@ -1,5 +1,8 @@
 <?php
 declare(strict_types=1);
+$requirements = [
+    'apiVersion' => 'v1',
+];
 // SPDX-FileCopyrightText: Ano Rangga Rahardika <rahardikaku@gmail.com>
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -12,13 +15,9 @@ declare(strict_types=1);
  * it's instantiated in there
  */
 return [
-	'resources' => [
-		'note' => ['url' => '/notes'],
-		'note_api' => ['url' => '/api/0.1/notes']
-	],
-	'routes' => [
-		['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],
-		['name' => 'note_api#preflighted_cors', 'url' => '/api/0.1/{path}',
-			'verb' => 'OPTIONS', 'requirements' => ['path' => '.+']]
-	]
+	'ocs' => [
+        ['name' => 'rating#getFilesRating', 'url' => '/api/{apiVersion}/rating/{id}', 'verb' => 'GET', 'requirements' => $requirements],
+        ['name' => 'rating#getInitialState', 'url' => '/api/{apiVersion}/rating/initialstate/{id}', 'verb' => 'GET', 'requirements' => $requirements],
+        ['name' => 'rating#addFilesRating', 'url' => '/api/{apiVersion}/rating/{id}', 'verb' => 'PUT', 'requirements' => $requirements],
+    ],
 ];

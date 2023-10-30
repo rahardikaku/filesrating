@@ -1,0 +1,29 @@
+#metadataTabView table {
+    margin-left: .5em;
+}
+
+#metadataTabView tr:hover {
+    background-color: transparent;
+}
+
+#metadataTabView td {
+    border: none;
+    padding: 0;
+}
+
+#metadataTabView .key {
+    color: #999;
+    padding-right: .5em;
+    vertical-align: top;
+}
+
+#metadataTabView .value {
+    width: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 1px;
+}
+
+#metadataTabView .value:hover {
+    white-space: pre-wrap;
+}
