@@ -9,7 +9,7 @@
     <name>Files Rating</name>
     <summary>Give rating to shared files</summary>
     <description><![CDATA[Give rating to shared files]]></description>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
     <licence>agpl</licence>
     <author mail="rahardikaku@gmail.com" >Ano Rangga Rahardika</author>
     <namespace>FilesRating</namespace>

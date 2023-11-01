@@ -6,6 +6,7 @@ declare(strict_types=1);
 namespace OCA\FilesRating\Db;
 
 use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Db\Entity;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
@@ -37,7 +38,7 @@ class FilesRatingMapper extends QBMapper {
 	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException
 	 * @throws DoesNotExistException
 	 */
-	public function findByUserAndFile(string $userId, string $fileId): FilesRating {
+	public function findByUserAndFile(string $userId, string $fileId) {
 		/* @var $qb IQueryBuilder */
 		$qb = $this->db->getQueryBuilder();
 		$qb->select('*')
@@ -48,7 +49,7 @@ class FilesRatingMapper extends QBMapper {
 			->andWhere(
 				$qb->expr()->eq('user_id', $qb->createNamedParameter($userId, IQueryBuilder::PARAM_STR))
 			);
-		return $this->findEntity($qb);
+        return $this->findEntity($qb);
 	}
 
 	/**
@@ -93,23 +94,50 @@ class FilesRatingMapper extends QBMapper {
         return $row['avg_rate'];
     }
 
-	/**
-	 * @param string $fileId
-	 * @throws DoesNotExistException
-	 * find semua rate dari file
-	 */
-	public function findRateFile(string $fileid) {
+
+	public function computeGroupRate(string $fileId) {
 		$qb = $this->db->getQueryBuilder();
 
-        $qb->select('*')
+        
+		$qb->select('rate')
+			->selectAlias($qb->createFunction('COUNT( * )'),'file_id')
             ->from($this->getTableName())
             ->where(
                 $qb->expr()->eq('file_id', $qb->createNamedParameter($fileId, IQueryBuilder::PARAM_STR))
 			)
-			->andWhere(
-                $qb->expr()->eq('is_avg', $qb->createNamedParameter(false, IQueryBuilder::PARAM_BOOL))
-			);
-        return $this->findEntities($qb);
+			->addGroupBy('rate');
+			// ->groupBy('rate');
+			// ->andWhere(
+            //     $qb->expr()->eq('is_avg', $qb->createNamedParameter(false, IQueryBuilder::PARAM_BOOL))
+			// )
+			// ->groupBy('rate');
+		// $cursor = $qb->execute();
+        // $row = $cursor->fetch();
+        // $cursor->closeCursor();
+        // return $row;
+		return $this->findEntities($qb);
+	}
+
+	/**
+	 * @param string $fileId
+	 * @throws DoesNotExistException
+	 * find semua rate dari file
+	 * GROUP BY RATE
+	 */
+	public function findRateFile(string $fileid) {
+		$qb = $this->db->getQueryBuilder();
+
+        $qb->selectAlias($qb->createFunction('AVG( rate )'), 'avg_rate')
+           ->from($this->getTableName())
+           ->where(
+               $qb->expr()->eq('file_id', $qb->createNamedParameter($fileId, IQueryBuilder::PARAM_STR))
+           );
+
+        $cursor = $qb->execute();
+        $row = $cursor->fetch();
+        $cursor->closeCursor();
+
+        return $row['avg_rate'];
 	}
 
 	/**
@@ -125,7 +153,7 @@ class FilesRatingMapper extends QBMapper {
         // $note->setName($name);
         $filesrating->setFileId($fileId);
 		$filesrating->setRate($rate);
-		$filesrating->setIsAvg($isAvg);
+		$filesrating->setIsAvg(false);
         // $timestamp = (new DateTime())->getTimestamp();
         return $this->insert($filesrating);
     }
@@ -169,6 +197,17 @@ class FilesRatingMapper extends QBMapper {
     
         return $this->update($filesrating);
     }
+
+	/**
+     * @param FilesRating $filesrating
+     * @param int $rate
+     * @return FilesRating|null
+     * @throws Exception
+     */
+	public function updateRateByEntity(FilesRating $filesrating, int $rate) : ?FilesRating{
+        $filesrating->setRate($rate);
+        return $this->update($filesrating);
+	}
 
 	
 

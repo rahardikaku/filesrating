@@ -11444,10 +11444,19 @@ __webpack_require__.r(__webpack_exports__);
       shares: [],
       state: {
         data: {
-          rate_avg: 0
+          rate_avg: 0,
+          rate_user: 0,
+          rate_group: [],
+          file_count: 0
         }
       },
-      tmp: 4
+      tmp: 4,
+      file_count_1: 0,
+      file_count_2: 0,
+      file_count_3: 0,
+      file_count_4: 0,
+      file_count_5: 0,
+      file_cont_n: 0
     };
   },
   computed: {
@@ -11469,10 +11478,17 @@ __webpack_require__.r(__webpack_exports__);
     }
   },
   methods: {
-    setInitialState(userId) {
-      const fileId = '5';
-      const url = (0,_nextcloud_router__WEBPACK_IMPORTED_MODULE_6__.generateOcsUrl)('apps/filesrating/api/v1/rating/initialstate/{userId}/{fileId}', {
-        userId,
+    initState() {
+      this.file_count_1 = 0;
+      this.file_count_2 = 0;
+      this.file_count_3 = 0;
+      this.file_count_4 = 0;
+      this.file_count_5 = 0;
+      this.file_cont_n = 0;
+    },
+    setInitialState() {
+      const fileId = this.fileInfo.id;
+      const url = (0,_nextcloud_router__WEBPACK_IMPORTED_MODULE_6__.generateOcsUrl)('apps/filesrating/api/v1/rating/initialstate/{fileId}', {
         fileId
       });
       _nextcloud_axios__WEBPACK_IMPORTED_MODULE_7__["default"].get(url).then(response => {
@@ -11482,20 +11498,53 @@ __webpack_require__.r(__webpack_exports__);
         console.error(error);
       });
     },
+    computePercent(rate) {
+      if (rate > 0 && this.file_cont_n > 0) {
+        return rate / this.file_cont_n * 100;
+      } else {
+        return 0;
+      }
+    },
     setState(response) {
       this.state.data = response?.data?.ocs?.data;
+      if (this.state.data.rate_group) {
+        for (const r of this.state.data.rate_group) {
+          switch (r.rate) {
+            case 1:
+              this.file_count_1 = r.fileId;
+              break;
+            case 2:
+              this.file_count_2 = r.fileId;
+              break;
+            case 3:
+              this.file_count_3 = r.fileId;
+              break;
+            case 4:
+              this.file_count_4 = r.fileId;
+              break;
+            case 5:
+              this.file_count_5 = r.fileId;
+              break;
+            default:
+              break;
+          }
+          this.file_cont_n += r.fileId;
+        }
+      }
     },
     setRating(rating) {
       this.rating = rating;
     },
-    save(id) {
+    save() {
       const options = {
         rate: this.rating
       };
+      const id = this.fileInfo.id;
       const url = (0,_nextcloud_router__WEBPACK_IMPORTED_MODULE_6__.generateOcsUrl)('apps/filesrating/api/v1/rating/{id}', {
         id
       });
       _nextcloud_axios__WEBPACK_IMPORTED_MODULE_7__["default"].put(url, options).then(response => {
+        this.initState();
         this.setState(response);
         (0,_nextcloud_dialogs__WEBPACK_IMPORTED_MODULE_8__.showSuccess)('Simpan rating berhasil');
       }).catch(error => {
@@ -11504,9 +11553,9 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     update(fileInfo) {
-      // console.log(fileInfo)
       this.fileInfo = fileInfo;
-      this.setInitialState(1);
+      this.initState();
+      this.setInitialState();
     }
   }
 });
@@ -11537,8 +11586,9 @@ var render = function render() {
   }, [_c("StarRating", {
     attrs: {
       "star-size": 30,
-      glow: 10,
-      "active-color": "#f00000"
+      glow: 2,
+      rating: parseInt(_vm.state.data?.rate_user),
+      "active-color": "#800000"
     },
     on: {
       "rating-selected": _vm.setRating
@@ -11551,7 +11601,7 @@ var render = function render() {
     },
     on: {
       click: function ($event) {
-        return _vm.save(1);
+        return _vm.save();
       }
     }
   }, [_vm._v("\n\t\t\t\t\tSimpan\n\t\t\t\t")])], 1)]), _vm._v(" "), _c("hr", {
@@ -11579,12 +11629,12 @@ var render = function render() {
     staticClass: "icon-star"
   }, [_c("StarOutlineIcon")], 1), _vm._v(" "), _c("NcProgressBar", {
     attrs: {
-      value: 0,
+      value: _vm.computePercent(_vm.file_count_5),
       size: "medium"
     }
   }), _vm._v(" "), _c("span", {
     staticClass: "count-people"
-  }, [_vm._v("0")])], 1), _vm._v(" "), _c("div", {
+  }, [_vm._v(_vm._s(_vm.file_count_5))])], 1), _vm._v(" "), _c("div", {
     staticClass: "bar-item"
   }, [_c("span", {
     staticClass: "label-star"
@@ -11592,12 +11642,12 @@ var render = function render() {
     staticClass: "icon-star"
   }, [_c("StarOutlineIcon")], 1), _vm._v(" "), _c("NcProgressBar", {
     attrs: {
-      value: 100,
+      value: _vm.computePercent(_vm.file_count_4),
       size: "medium"
     }
   }), _vm._v(" "), _c("span", {
     staticClass: "count-people"
-  }, [_vm._v("2")])], 1), _vm._v(" "), _c("div", {
+  }, [_vm._v(_vm._s(_vm.file_count_4))])], 1), _vm._v(" "), _c("div", {
     staticClass: "bar-item"
   }, [_c("span", {
     staticClass: "label-star"
@@ -11610,7 +11660,7 @@ var render = function render() {
     }
   }), _vm._v(" "), _c("span", {
     staticClass: "count-people"
-  }, [_vm._v("0")])], 1), _vm._v(" "), _c("div", {
+  }, [_vm._v(_vm._s(_vm.file_count_3))])], 1), _vm._v(" "), _c("div", {
     staticClass: "bar-item"
   }, [_c("span", {
     staticClass: "label-star"
@@ -11623,7 +11673,7 @@ var render = function render() {
     }
   }), _vm._v(" "), _c("span", {
     staticClass: "count-people"
-  }, [_vm._v("0")])], 1), _vm._v(" "), _c("div", {
+  }, [_vm._v(_vm._s(_vm.file_count_2))])], 1), _vm._v(" "), _c("div", {
     staticClass: "bar-item"
   }, [_c("span", {
     staticClass: "label-star"
@@ -11636,7 +11686,7 @@ var render = function render() {
     }
   }), _vm._v(" "), _c("span", {
     staticClass: "count-people"
-  }, [_vm._v("0")])], 1)])], 1)]), _vm._v(" "), _c("NcEmptyContent")], 1);
+  }, [_vm._v(_vm._s(_vm.file_count_1))])], 1)])], 1)]), _vm._v(" "), _c("NcEmptyContent")], 1);
 };
 var staticRenderFns = [];
 render._withStripped = true;

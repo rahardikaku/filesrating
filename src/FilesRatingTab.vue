@@ -10,11 +10,12 @@
 				<div class="mb-2">
 					<StarRating :star-size="30"
 						@rating-selected ="setRating"
-						:glow="10"
-						active-color='#f00000' />
+						:glow="2"
+						:rating="parseInt(state.data?.rate_user)"
+						active-color='#800000' />
 				</div>
 				<div>
-					<NcButton @click="save(1)"
+					<NcButton @click="save()"
 						:wide="true"
 						type="primary"
 						text="Simpan">
@@ -37,16 +38,16 @@
 						<span class="icon-star">
 							<StarOutlineIcon />
 						</span>
-						<NcProgressBar :value="0" size="medium" />
-						<span class="count-people">0</span>
+						<NcProgressBar :value="computePercent(file_count_5)" size="medium" />
+						<span class="count-people">{{ file_count_5 }}</span>
 					</div>
 					<div class="bar-item">
 						<span class="label-star">4</span>
 						<span class="icon-star">
 							<StarOutlineIcon />
 						</span>
-						<NcProgressBar :value="100" size="medium" />
-						<span class="count-people">2</span>
+						<NcProgressBar :value="computePercent(file_count_4)" size="medium" />
+						<span class="count-people">{{ file_count_4 }}</span>
 					</div>
 					<div class="bar-item">
 						<span class="label-star">3</span>
@@ -54,7 +55,7 @@
 							<StarOutlineIcon />
 						</span>
 						<NcProgressBar :value="0" size="medium" />
-						<span class="count-people">0</span>
+						<span class="count-people">{{ file_count_3 }}</span>
 					</div>
 					<div class="bar-item">
 						<span class="label-star">2</span>
@@ -62,7 +63,7 @@
 							<StarOutlineIcon />
 						</span>
 						<NcProgressBar :value="0" size="medium" />
-						<span class="count-people">0</span>
+						<span class="count-people">{{ file_count_2 }}</span>
 					</div>
 					<div class="bar-item">
 						<span class="label-star">1</span>
@@ -70,7 +71,7 @@
 							<StarOutlineIcon />
 						</span>
 						<NcProgressBar :value="0" size="medium" />
-						<span class="count-people">0</span>
+						<span class="count-people">{{ file_count_1 }}</span>
 					</div>
 				</div>
 			</div>
@@ -110,8 +111,14 @@ export default {
 			token: null,
 			fileInfo: {},
 			shares: [],
-			state: { data: { rate_avg: 0 } },
-			tmp: 4
+			state: { data: { rate_avg: 0, rate_user: 0, rate_group: [], file_count: 0 } },
+			tmp: 4,
+			file_count_1: 0,
+			file_count_2: 0,
+			file_count_3: 0,
+			file_count_4: 0,
+			file_count_5: 0,
+			file_cont_n: 0
 		}
 	},
 	computed: {
@@ -133,9 +140,17 @@ export default {
 		}
 	},
 	methods: {
-		setInitialState(userId) {
-			const fileId = '5'
-			const url = generateOcsUrl('apps/filesrating/api/v1/rating/initialstate/{userId}/{fileId}', { userId, fileId })
+		initState() {
+			this.file_count_1 = 0
+			this.file_count_2 = 0
+			this.file_count_3 = 0
+			this.file_count_4 = 0
+			this.file_count_5 = 0
+			this.file_cont_n = 0
+		},
+		setInitialState() {
+			const fileId = this.fileInfo.id
+			const url = generateOcsUrl('apps/filesrating/api/v1/rating/initialstate/{fileId}', { fileId })
 			axios.get(url).then(response => {
 				this.setState(response)
 			}).catch((error) => {
@@ -143,18 +158,51 @@ export default {
 				console.error(error)
 			})
 		},
+		computePercent(rate) {
+			if (rate > 0 && this.file_cont_n > 0) {
+				return (rate / this.file_cont_n) * 100
+			} else {
+				return 0
+			}
+		},
 		setState(response) {
 			this.state.data = response?.data?.ocs?.data
+			if (this.state.data.rate_group) {
+				for (const r of this.state.data.rate_group) {
+					switch (r.rate) {
+					case 1:
+						this.file_count_1 = r.fileId
+						break
+					case 2:
+						this.file_count_2 = r.fileId
+						break
+					case 3:
+						this.file_count_3 = r.fileId
+						break
+					case 4:
+						this.file_count_4 = r.fileId
+						break
+					case 5:
+						this.file_count_5 = r.fileId
+						break
+					default:
+						break
+					}
+					this.file_cont_n += r.fileId
+				}
+			}
 		},
 		setRating(rating) {
 			this.rating = rating
 		},
-		save(id) {
+		save() {
 			const options = {
 				rate: this.rating,
 			}
+			const id = this.fileInfo.id
 			const url = generateOcsUrl('apps/filesrating/api/v1/rating/{id}', { id })
 			axios.put(url, options).then(response => {
+				this.initState()
 				this.setState(response)
 				showSuccess('Simpan rating berhasil')
 			}).catch((error) => {
@@ -163,10 +211,9 @@ export default {
 			})
 		},
 		update(fileInfo) {
-
-			// console.log(fileInfo)
 			this.fileInfo = fileInfo
-			this.setInitialState(1)
+			this.initState()
+			this.setInitialState()
 		},
 	},
 }

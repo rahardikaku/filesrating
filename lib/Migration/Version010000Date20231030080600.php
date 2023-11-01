@@ -46,8 +46,9 @@ class Version010000Date20231030080600 extends SimpleMigrationStep {
                 'length' => 4,
             ]);
 			$table->addColumn('is_avg', Types::BOOLEAN, [
-                'notnull' => true,
-                'length' => 4,
+                'notnull' => false,
+				'default' => false,
+                'length' => 1,
             ]);
             // $table->addColumn('name', Types::STRING, [
             //     'notnull' => true,

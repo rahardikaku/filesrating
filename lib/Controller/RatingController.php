@@ -2,6 +2,8 @@
 namespace OCA\FilesRating\Controller;
 
 use Exception;
+use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCA\FilesRating\Db\FilesRatingMapper;
 // use OCA\NoteBook\Service\NoteService;
 use OCP\AppFramework\Http;
@@ -38,24 +40,32 @@ class RatingController extends OCSController {
 
 	/**
      * @NoAdminRequired
-     * @param string $userId
 	 * @param string $fileId
      * @return DataResponse
      */
-    public function getInitialState(string $userId, string $fileId): DataResponse {
-		//get average rating file
-		//$avgRateFile = $this->filesRatingMapper->findAvgRateFile($fileId);
-
+    public function getInitialState(string $fileId): DataResponse {
 		//get average rating file by computing
-		//$avgRateFile = $this->filesRatingMapper->computeAvgRateFile($fileId);
+		$avgRateFile = $this->filesRatingMapper->computeAvgRateFile($fileId);
+		$avgRateFile = number_format((float)$avgRateFile, 1, '.', '');
 
 		//get all rating by file id
-		//$allRateFile = $this->filesRatingMapper->findRateFile($fileId);
+		$allRateFile = $this->filesRatingMapper->computeGroupRate($fileId);
+	
+		// var_dump($allRateFile);
 
 		//get rating current user and file id
-		//$ratingUserFile =  $this->filesRatingMapper->findByUserAndFile($userId,$fileId);
-
-		$data = ['id' => '1', 'rate_avg' => '3'];
+		try {
+			$ratingUserFile =  $this->filesRatingMapper->findByUserAndFile($this->userId,$fileId);
+        } catch (DoesNotExistException | MultipleObjectsReturnedException $e) {
+            $ratingUserFile = null;
+        }
+		// var_dump($ratingUserFile=>rate);
+		$data = [
+			'rate_avg' => $avgRateFile ? $avgRateFile : '0',
+			'rate_user' => $ratingUserFile ? $ratingUserFile->getRate(): '0',
+			'rate_group' => $allRateFile ? $allRateFile : null
+		];
+		// var_dump($data);
         try {
             return new DataResponse($data);
         } catch (Exception | Throwable $e) {
@@ -66,13 +76,37 @@ class RatingController extends OCSController {
     /**
      * @NoAdminRequired
      *
-     * @param int $iddoc
+     * @param int $fileid
      * @param int $rate
      * @return DataResponse
      */
-    public function addFilesRating(int $id,?int $rate = null): DataResponse {
+    public function addFilesRating(string $fileId,?int $rate = null): DataResponse {
+		try {
+			$ratingUserFile =  $this->filesRatingMapper->findByUserAndFile($this->userId,$fileId);
+        } catch (DoesNotExistException | MultipleObjectsReturnedException $e) {
+            $ratingUserFile = null;
+        }
+		if ($ratingUserFile){
+			//update
+			$ratingUserFile = $this->filesRatingMapper->updateRateByEntity($ratingUserFile,$rate);
+		} else {
+			//create
+			$ratingUserFile = $this->filesRatingMapper->createRate($this->userId,$fileId,$rate);
+		}
+		//get average rating file by computing
+		$avgRateFile = $this->filesRatingMapper->computeAvgRateFile($fileId);
+		$avgRateFile = number_format((float)$avgRateFile, 1, '.', '');
+
+		//get all rating by file id
+		$allRateFile = $this->filesRatingMapper->computeGroupRate($fileId);
+
+		$data = [
+			'rate_avg' => $avgRateFile ? $avgRateFile : '0',
+			'rate_user' => $ratingUserFile ? $ratingUserFile->getRate(): '0',
+			'rate_group' => $allRateFile ? $allRateFile : null
+		];
         try {
-			$data = ['id' => '1', 'rate_avg' => $rate];
+			// $data = ['id' => '1', 'rate_avg' => $rate];
             return new DataResponse($data);
         } catch (Exception | Throwable $e) {
             return new DataResponse(['error' => $e->getMessage()], Http::STATUS_BAD_REQUEST);

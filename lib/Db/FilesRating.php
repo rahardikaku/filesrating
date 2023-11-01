@@ -45,7 +45,7 @@ class FilesRating extends Entity implements \JsonSerializable {
             // 'name' => $this->name,
 			'fileId' => $this->fileId,
 			'rate' => $this->rate,
-			'isAvg' =? this->isAvg
+			'isAvg' => $this->isAvg
         ];
     }
 }
