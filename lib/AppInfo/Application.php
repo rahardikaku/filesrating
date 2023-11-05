@@ -21,6 +21,7 @@ class Application extends App implements IBootstrap {
 		$dispatcher = $this->getContainer()->query(IEventDispatcher::class);
 		$dispatcher->addListener(LoadAdditionalScriptsEvent::class, function() {
 			// ...
+			\OCP\Util::addScript(self::APP_ID, 'filesactions-extra' );
 			\OCP\Util::addScript(self::APP_ID, 'filesrating-main' );
 			\OCP\Util::addscript(self::APP_ID, 'filesrating','files');
 		});
